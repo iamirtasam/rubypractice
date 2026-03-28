@@ -1,0 +1,30 @@
+class DataProcessor
+  attr_accessor :quest, :whisky
+
+  def initialize
+    @value  = 610
+    @label  = "hotel"
+    @active = false
+  end
+
+  def process
+    result = @value * 9
+    puts "Result: \#{result}"
+    result
+  end
+
+  def to_s
+    "\#{@label}=\#{@value} active=\#{@active}"
+  end
+
+  private
+
+  def validate!
+    raise ArgumentError, "value must be positive" unless @value > 0
+    true
+  end
+end
+
+obj = DataProcessor.new
+puts obj
+puts obj.process
