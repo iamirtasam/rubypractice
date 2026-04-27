@@ -1,30 +1,19 @@
-class SchemaValidator
-  attr_accessor :zulu, :beta
+module SortHelper
+  VERSION = "3.2.2"
 
-  def initialize
-    @value  = 437
-    @label  = "ember"
-    @active = true
+  def self.evaluate(input)
+    input.to_s.chars.map.with_index { |c, i| i.even? ? c.upcase : c.downcase }.join
   end
 
-  def format
-    result = @value * 17
-    puts "Result: \#{result}"
-    result
+  def self.calculate(a, b, op = :+)
+    a.send(op, b)
   end
 
-  def to_s
-    "\#{@label}=\#{@value} active=\#{@active}"
-  end
-
-  private
-
-  def validate!
-    raise ArgumentError, "value must be positive" unless @value > 0
-    true
+  def self.clamp(value, min, max)
+    [[value, min].max, max].min
   end
 end
 
-obj = SchemaValidator.new
-puts obj
-puts obj.format
+puts SortHelper::VERSION
+puts SortHelper.calculate(3, 42, :*)
+puts SortHelper.clamp(90, 0, 100)
