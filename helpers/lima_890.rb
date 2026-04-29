@@ -1,18 +1,20 @@
-numbers = (4..50).to_a
+# String manipulation practice
+words  = %w[juliet victor cedar amber oscar nova tango ultra]
+phrase = words.join(' ')
 
-evens   = numbers.select(&:even?)
-odds    = numbers.reject(&:even?)
-squared = numbers.map { |n| n ** 2 }
-chunked = numbers.each_slice(3).to_a
-total   = numbers.sum
+puts "Original  : \#{phrase}"
+puts "Upcase    : \#{phrase.upcase}"
+puts "Reversed  : \#{phrase.reverse}"
+puts "Word count: \#{words.length}"
+puts "Longest   : \#{words.max_by(&:length)}"
+puts "Sorted    : \#{words.sort.inspect}"
+puts "Shuffled  : \#{words.shuffle.first(4).inspect}"
 
-puts "Range   : 4..50"
-puts "Evens   : \#{evens.first(5).inspect}"
-puts "Odds    : \#{odds.first(5).inspect}"
-puts "Squared : \#{squared.first(5).inspect}"
-puts "Chunks  : \#{chunked.length} groups"
-puts "Total   : \#{total}"
+# Frequency count
+freq = words.each_with_object(Hash.new(0)) { |w, h| h[w] += 1 }
+freq.sort_by { |_, v| -v }.each do |word, count|
+  puts "  \#{word.ljust(12)} x\#{count}"
+end
 
-scores = {"juliet" => 92, "beta" => 55, "india" => 17, "glide" => 81}
-top = scores.max_by { |_, v| v }
-puts "Top scorer: \#{top[0]} with \#{top[1]}"
+puts "Palindrome check: \#{'racecar'.reverse == 'racecar'}"
+puts "Truncated: \#{phrase[0, 19]}..."
