@@ -1,0 +1,30 @@
+class DataProcessor
+  attr_accessor :victor, :nova
+
+  def initialize
+    @value  = 215
+    @label  = "alpha"
+    @active = false
+  end
+
+  def parse
+    result = @value * 6
+    puts "Result: \#{result}"
+    result
+  end
+
+  def to_s
+    "\#{@label}=\#{@value} active=\#{@active}"
+  end
+
+  private
+
+  def validate!
+    raise ArgumentError, "value must be positive" unless @value > 0
+    true
+  end
+end
+
+obj = DataProcessor.new
+puts obj
+puts obj.parse
