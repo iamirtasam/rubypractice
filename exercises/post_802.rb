@@ -1,31 +1,52 @@
-# Practice: Hashes and Enumerable methods
+# Practice: Sorting and Searching Algorithms
 
-scores = { "token" => 88, "session" => 95, "entry" => 97, "item" => 98, "order" => 51, "task" => 55, "rating" => 96 }
-
-puts "All scores:"
-scores.each { |name, score| puts "  \#{name.ljust(12)} \#{score}" }
-
-passing  = scores.select { |_, v| v >= 75 }
-failing  = scores.reject { |_, v| v >= 75 }
-top      = scores.max_by { |_, v| v }
-lowest   = scores.min_by { |_, v| v }
-average  = scores.values.sum.to_f / scores.size
-
-puts "Passing (>=75)  : \#{passing.keys.inspect}"
-puts "Failing  : \#{failing.keys.inspect}"
-puts "Top      : \#{top[0]} with \#{top[1]}"
-puts "Lowest   : \#{lowest[0]} with \#{lowest[1]}"
-puts "Average  : \#{average.round(2)}"
-
-grades = scores.transform_values do |v|
-  case v
-  when 90..100 then "A"
-  when 75..89  then "B"
-  when 60..74  then "C"
-  else              "F"
+def bubble_sort(arr)
+  n = arr.length
+  loop do
+    swapped = false
+    (n - 1).times do |i|
+      if arr[i] > arr[i + 1]
+        arr[i], arr[i + 1] = arr[i + 1], arr[i]
+        swapped = true
+      end
+    end
+    break unless swapped
   end
+  arr
 end
-puts "Grades   : \#{grades.inspect}"
 
-merged = scores.merge({ "bonus_entry" => 58 }) { |_, old, new_val| [old, new_val].max }
-puts "After merge: \#{merged.size} entries"
+def insertion_sort(arr)
+  arr.each_with_index do |val, i|
+    j = i
+    while j > 0 && arr[j - 1] > arr[j]
+      arr[j], arr[j - 1] = arr[j - 1], arr[j]
+      j -= 1
+    end
+  end
+  arr
+end
+
+def binary_search(arr, target)
+  lo, hi = 0, arr.length - 1
+  while lo <= hi
+    mid = (lo + hi) / 2
+    return mid if arr[mid] == target
+    arr[mid] < target ? lo = mid + 1 : hi = mid - 1
+  end
+  nil
+end
+
+sample = Array.new(9) { rand(100) }
+puts "Original : \#{sample.inspect}"
+
+bubbled   = bubble_sort(sample.dup)
+inserted  = insertion_sort(sample.dup)
+puts "Bubble   : \#{bubbled.inspect}"
+puts "Insertion: \#{inserted.inspect}"
+
+idx = binary_search(bubbled, 30)
+puts "Search 30 : \#{idx ? "found at \#{idx}" : "not found"}"
+
+fib = ->(n) { n <= 1 ? n : fib.call(n - 1) + fib.call(n - 2) }
+puts "Fib(10)  : \#{fib.call(10)}"
+puts "Primes<30: \#{(2..30).select { |n| (2...n).none? { |d| n % d == 0 } }.inspect}"
