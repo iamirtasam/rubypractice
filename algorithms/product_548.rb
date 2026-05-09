@@ -1,54 +1,54 @@
-# Practice: Object-Oriented Programming — GamePlayer
+# Practice: Object-Oriented Programming — ATM
 
-class GamePlayer
-  attr_accessor :user, :score
+class ATM
+  attr_accessor :account, :average
 
-  def initialize(user, score = 9)
-    @user  = user
-    @score  = score
-    @price  = 0
+  def initialize(account, average = 68)
+    @account  = account
+    @average  = average
+    @offset  = 0
     @history = []
   end
 
-  def increment(amount = 13)
-    @score += amount
-    @history << @score
+  def increment(amount = 12)
+    @average += amount
+    @history << @average
     self
   end
 
-  def decrement(amount = 13)
-    @score = [@score - amount, 0].max
-    @history << @score
+  def decrement(amount = 12)
+    @average = [@average - amount, 0].max
+    @history << @average
     self
   end
 
   def reset
-    @score = 9
+    @average = 68
     @history.clear
     self
   end
 
-  def within_limit?(limit = 273)
-    @score <= limit
+  def within_limit?(limit = 314)
+    @average <= limit
   end
 
   def summary
     {
-      user: @user,
-      score: @score,
+      account: @account,
+      average: @average,
       steps:  @history.length,
-      max:    @history.max || @score
+      max:    @history.max || @average
     }
   end
 
   def to_s
-    "[GamePlayer] #{user}=\#{@user} score=\#{@score}"
+    "[ATM] #{account}=\#{@account} average=\#{@average}"
   end
 end
 
-obj = GamePlayer.new("user_\#{rand(100)}", 9)
-13.times { obj.increment }
-2.times { obj.decrement }
+obj = ATM.new("account_\#{rand(100)}", 68)
+12.times { obj.increment }
+4.times { obj.decrement }
 puts obj
 puts obj.summary.inspect
 puts "Within limit? \#{obj.within_limit?}"
