@@ -1,52 +1,62 @@
-# Practice: Sorting and Searching Algorithms
+# Practice: Modules and Mixins
 
-def bubble_sort(arr)
-  n = arr.length
-  loop do
-    swapped = false
-    (n - 1).times do |i|
-      if arr[i] > arr[i + 1]
-        arr[i], arr[i + 1] = arr[i + 1], arr[i]
-        swapped = true
-      end
+module Greetable
+  def greet
+    "Hello, I am \#{self.class.name}: \#{to_s}"
+  end
+
+  def farewell
+    "Goodbye from \#{self.class.name}"
+  end
+end
+
+module Notifiable
+  def self.included(base)
+    base.instance_variable_set(:@tracked_count, 0)
+    base.extend(ClassMethods)
+  end
+
+  module ClassMethods
+    def track!
+      @tracked_count = (@tracked_count || 0) + 1
     end
-    break unless swapped
-  end
-  arr
-end
 
-def insertion_sort(arr)
-  arr.each_with_index do |val, i|
-    j = i
-    while j > 0 && arr[j - 1] > arr[j]
-      arr[j], arr[j - 1] = arr[j - 1], arr[j]
-      j -= 1
+    def tracked_count
+      @tracked_count || 0
     end
   end
-  arr
-end
 
-def binary_search(arr, target)
-  lo, hi = 0, arr.length - 1
-  while lo <= hi
-    mid = (lo + hi) / 2
-    return mid if arr[mid] == target
-    arr[mid] < target ? lo = mid + 1 : hi = mid - 1
+  def log_action(action)
+    self.class.track!
+    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
   end
-  nil
 end
 
-sample = Array.new(13) { rand(100) }
-puts "Original : \#{sample.inspect}"
+class Employee
+  include Greetable
+  include Notifiable
 
-bubbled   = bubble_sort(sample.dup)
-inserted  = insertion_sort(sample.dup)
-puts "Bubble   : \#{bubbled.inspect}"
-puts "Insertion: \#{inserted.inspect}"
+  attr_reader :item
 
-idx = binary_search(bubbled, 29)
-puts "Search 29 : \#{idx ? "found at \#{idx}" : "not found"}"
+  def initialize(item)
+    @item = item
+  end
 
-fib = ->(n) { n <= 1 ? n : fib.call(n - 1) + fib.call(n - 2) }
-puts "Fib(10)  : \#{fib.call(10)}"
-puts "Primes<30: \#{(2..30).select { |n| (2...n).none? { |d| n % d == 0 } }.inspect}"
+  def to_s
+    "\#{@item}"
+  end
+
+  def perform
+    log_action(:perform)
+    "performed by \#{@item}"
+  end
+end
+
+3.times do |i|
+  obj = Employee.new("item_\#{i + 1}")
+  puts obj.greet
+  puts obj.perform
+  puts obj.farewell
+  puts "---"
+end
+puts "Employee tracked actions: \#{Employee.tracked_count}"
