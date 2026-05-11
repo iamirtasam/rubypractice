@@ -1,43 +1,24 @@
-# Practice: Class with Comparable and Enumerable
+# Practice: String Methods
 
-class BookStore
-  include Comparable
+sentence = "the quick brown fox jumps over the lazy dog"
 
-  attr_reader :product, :rate
+puts sentence.upcase
+puts sentence.capitalize
+puts sentence.reverse
+puts sentence.length
+puts sentence.count("aeiou")
+puts sentence.gsub(/[aeiou]/, "*")
+puts sentence.split.length
+puts sentence.split.map(&:capitalize).join(" ")
+puts sentence.include?("ruby") ? "Ruby mentioned!" : "No Ruby here"
+puts sentence[0, 16] + "..."
+puts sentence.center(66, "-")
+puts sentence.squeeze(" ").strip
 
-  def initialize(product, rate)
-    @product = product
-    @rate = rate.to_f
-  end
+words = sentence.split
+puts "Longest word  : \#{words.max_by(&:length)}"
+puts "Shortest word : \#{words.min_by(&:length)}"
+puts "Unique chars  : \#{sentence.chars.uniq.sort.inspect}"
 
-  def <=>(other)
-    @rate <=> other.rate
-  end
-
-  def to_s
-    "\#{@product} (rate: \#{@rate})"
-  end
-
-  def discounted(percent)
-    discounted_val = @rate * (1 - percent / 100.0)
-    self.class.new("\#{@product}_sale", discounted_val.round(2))
-  end
-end
-
-items = [
-  BookStore.new("product_a", 28),
-  BookStore.new("product_b", 64),
-  BookStore.new("product_c", 120),
-  BookStore.new("product_d", 13),
-]
-
-puts "All items:"
-items.each { |i| puts "  \#{i}" }
-puts "Sorted    : \#{items.sort.map(&:to_s).inspect}"
-puts "Min       : \#{items.min}"
-puts "Max       : \#{items.max}"
-puts "Avg rate: \#{(items.sum(&:rate) / items.size).round(2)}"
-
-sale_items = items.map { |i| i.discounted(6) }
-puts "After \#{}% off:"
-sale_items.each { |i| puts "  \#{i}" }
+freq = sentence.chars.tally.sort_by { |_, v| -v }.first(5)
+puts "Top 5 chars   : \#{freq.inspect}"
