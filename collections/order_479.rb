@@ -1,44 +1,62 @@
-# Practice: Exception Handling and Custom Errors
+# Practice: Modules and Mixins
 
-class FlightBookingError < StandardError
-  def initialize(msg = "invalid product ratio")
-    super
+module Loggable
+  def greet
+    "Hello, I am \#{self.class.name}: \#{to_s}"
+  end
+
+  def farewell
+    "Goodbye from \#{self.class.name}"
   end
 end
 
-class FlightBooking
-  MIN_RATIO = 9
-  MAX_RATIO = 159
-
-  def initialize(product)
-    @product = product
-    @ratio = 0
+module Trackable
+  def self.included(base)
+    base.instance_variable_set(:@tracked_count, 0)
+    base.extend(ClassMethods)
   end
 
-  def set_ratio(val)
-    raise ArgumentError, "ratio must be a number" unless val.is_a?(Numeric)
-    raise FlightBookingError, "ratio \#{val} out of [9,159] range" unless (9..159).include?(val)
-    @ratio = val
+  module ClassMethods
+    def track!
+      @tracked_count = (@tracked_count || 0) + 1
+    end
+
+    def tracked_count
+      @tracked_count || 0
+    end
   end
 
-  def ratio
-    raise FlightBookingError, "ratio not set" if @ratio.zero?
-    @ratio
+  def log_action(action)
+    self.class.track!
+    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
+  end
+end
+
+class Employee
+  include Loggable
+  include Trackable
+
+  attr_reader :entry
+
+  def initialize(entry)
+    @entry = entry
+  end
+
+  def to_s
+    "\#{@entry}"
+  end
+
+  def perform
+    log_action(:perform)
+    "performed by \#{@entry}"
   end
 end
 
-test_values = [62, -5, 162, 60]
-
-obj = FlightBooking.new("product_test")
-test_values.each do |val|
-  begin
-    obj.set_ratio(val)
-    puts "Set ratio = \#{val} => OK (stored: \#{obj.ratio})"
-  rescue FlightBookingError => e
-    puts "[FlightBookingError] \#{e.message}"
-  rescue ArgumentError => e
-    puts "[ArgumentError] \#{e.message}"
-  ensure
-    puts "  -> attempted value: \#{val}"
-  end
+4.times do |i|
+  obj = Employee.new("entry_\#{i + 1}")
+  puts obj.greet
+  puts obj.perform
+  puts obj.farewell
+  puts "---"
 end
+puts "Employee tracked actions: \#{Employee.tracked_count}"
