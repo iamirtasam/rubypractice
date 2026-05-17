@@ -1,54 +1,62 @@
-# Practice: Object-Oriented Programming — Employee
+# Practice: Modules and Mixins
 
-class Employee
-  attr_accessor :item, :price
-
-  def initialize(item, price = 79)
-    @item  = item
-    @price  = price
-    @output  = 0
-    @history = []
+module Loggable
+  def greet
+    "Hello, I am \#{self.class.name}: \#{to_s}"
   end
 
-  def increment(amount = 17)
-    @price += amount
-    @history << @price
-    self
-  end
-
-  def decrement(amount = 17)
-    @price = [@price - amount, 0].max
-    @history << @price
-    self
-  end
-
-  def reset
-    @price = 79
-    @history.clear
-    self
-  end
-
-  def within_limit?(limit = 427)
-    @price <= limit
-  end
-
-  def summary
-    {
-      item: @item,
-      price: @price,
-      steps:  @history.length,
-      max:    @history.max || @price
-    }
-  end
-
-  def to_s
-    "[Employee] #{item}=\#{@item} price=\#{@price}"
+  def farewell
+    "Goodbye from \#{self.class.name}"
   end
 end
 
-obj = Employee.new("item_\#{rand(100)}", 79)
-17.times { obj.increment }
-3.times { obj.decrement }
-puts obj
-puts obj.summary.inspect
-puts "Within limit? \#{obj.within_limit?}"
+module Cacheable
+  def self.included(base)
+    base.instance_variable_set(:@tracked_count, 0)
+    base.extend(ClassMethods)
+  end
+
+  module ClassMethods
+    def track!
+      @tracked_count = (@tracked_count || 0) + 1
+    end
+
+    def tracked_count
+      @tracked_count || 0
+    end
+  end
+
+  def log_action(action)
+    self.class.track!
+    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
+  end
+end
+
+class BankAccount
+  include Loggable
+  include Cacheable
+
+  attr_reader :post
+
+  def initialize(post)
+    @post = post
+  end
+
+  def to_s
+    "\#{@post}"
+  end
+
+  def perform
+    log_action(:perform)
+    "performed by \#{@post}"
+  end
+end
+
+3.times do |i|
+  obj = BankAccount.new("post_\#{i + 1}")
+  puts obj.greet
+  puts obj.perform
+  puts obj.farewell
+  puts "---"
+end
+puts "BankAccount tracked actions: \#{BankAccount.tracked_count}"
