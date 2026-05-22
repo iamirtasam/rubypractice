@@ -1,38 +1,62 @@
-# Practice: Blocks, Procs, and Iterators
+# Practice: Modules and Mixins
 
-numbers = (1..10).to_a
+module Greetable
+  def greet
+    "Hello, I am \#{self.class.name}: \#{to_s}"
+  end
 
-# Using select and map with blocks
-evens   = numbers.select { |n| n.even? }
-odd_sq  = numbers.select(&:odd?).map { |n| n ** 2 }
-scaled  = numbers.map { |n| n * 5 }
-
-puts "Numbers : \#{numbers.inspect}"
-puts "Evens   : \#{evens.inspect}"
-puts "Odd²    : \#{odd_sq.inspect}"
-puts "x5      : \#{scaled.inspect}"
-
-# reduce / inject
-sum     = numbers.reduce(0) { |acc, n| acc + n }
-product = numbers.first(4).inject(:*)
-puts "Sum     : \#{sum}"
-puts "Product : \#{product}"
-
-# Grouping
-grouped = numbers.group_by { |n| n % 3 == 0 ? :fizz : n % 2 == 0 ? :even : :odd }
-grouped.each do |key, vals|
-  puts "  \#{key.to_s.ljust(6)}: \#{vals.inspect}"
+  def farewell
+    "Goodbye from \#{self.class.name}"
+  end
 end
 
-# Custom proc
-double = Proc.new { |x| x * 2 }
-square = ->(x) { x ** 2 }
+module Observable
+  def self.included(base)
+    base.instance_variable_set(:@tracked_count, 0)
+    base.extend(ClassMethods)
+  end
 
-puts "Double 7 : \#{double.call(7)}"
-puts "Square 7 : \#{square.call(7)}"
+  module ClassMethods
+    def track!
+      @tracked_count = (@tracked_count || 0) + 1
+    end
 
-# each_with_object
-tally = (1..5).each_with_object(Hash.new(0)) do |i, h|
-  h[i % 3 == 0 ? :message : :other] += 1
+    def tracked_count
+      @tracked_count || 0
+    end
+  end
+
+  def log_action(action)
+    self.class.track!
+    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
+  end
 end
-puts "Tally   : \#{tally.inspect}"
+
+class WeatherReport
+  include Greetable
+  include Observable
+
+  attr_reader :record
+
+  def initialize(record)
+    @record = record
+  end
+
+  def to_s
+    "\#{@record}"
+  end
+
+  def perform
+    log_action(:perform)
+    "performed by \#{@record}"
+  end
+end
+
+3.times do |i|
+  obj = WeatherReport.new("record_\#{i + 1}")
+  puts obj.greet
+  puts obj.perform
+  puts obj.farewell
+  puts "---"
+end
+puts "WeatherReport tracked actions: \#{WeatherReport.tracked_count}"
