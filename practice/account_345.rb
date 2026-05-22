@@ -1,31 +1,38 @@
-# Practice: Hashes and Enumerable methods
+# Practice: Blocks, Procs, and Iterators
 
-scores = { "tag" => 99, "record" => 61, "token" => 93, "order" => 92, "post" => 91, "review" => 57 }
+numbers = (1..18).to_a
 
-puts "All scores:"
-scores.each { |name, score| puts "  \#{name.ljust(12)} \#{score}" }
+# Using select and map with blocks
+evens   = numbers.select { |n| n.even? }
+odd_sq  = numbers.select(&:odd?).map { |n| n ** 2 }
+scaled  = numbers.map { |n| n * 4 }
 
-passing  = scores.select { |_, v| v >= 67 }
-failing  = scores.reject { |_, v| v >= 67 }
-top      = scores.max_by { |_, v| v }
-lowest   = scores.min_by { |_, v| v }
-average  = scores.values.sum.to_f / scores.size
+puts "Numbers : \#{numbers.inspect}"
+puts "Evens   : \#{evens.inspect}"
+puts "Odd²    : \#{odd_sq.inspect}"
+puts "x4      : \#{scaled.inspect}"
 
-puts "Passing (>=67)  : \#{passing.keys.inspect}"
-puts "Failing  : \#{failing.keys.inspect}"
-puts "Top      : \#{top[0]} with \#{top[1]}"
-puts "Lowest   : \#{lowest[0]} with \#{lowest[1]}"
-puts "Average  : \#{average.round(2)}"
+# reduce / inject
+sum     = numbers.reduce(0) { |acc, n| acc + n }
+product = numbers.first(3).inject(:*)
+puts "Sum     : \#{sum}"
+puts "Product : \#{product}"
 
-grades = scores.transform_values do |v|
-  case v
-  when 90..100 then "A"
-  when 75..89  then "B"
-  when 60..74  then "C"
-  else              "F"
-  end
+# Grouping
+grouped = numbers.group_by { |n| n % 3 == 0 ? :fizz : n % 2 == 0 ? :even : :odd }
+grouped.each do |key, vals|
+  puts "  \#{key.to_s.ljust(6)}: \#{vals.inspect}"
 end
-puts "Grades   : \#{grades.inspect}"
 
-merged = scores.merge({ "bonus_entry" => 95 }) { |_, old, new_val| [old, new_val].max }
-puts "After merge: \#{merged.size} entries"
+# Custom proc
+double = Proc.new { |x| x * 2 }
+square = ->(x) { x ** 2 }
+
+puts "Double 7 : \#{double.call(7)}"
+puts "Square 7 : \#{square.call(7)}"
+
+# each_with_object
+tally = (1..9).each_with_object(Hash.new(0)) do |i, h|
+  h[i % 2 == 0 ? :message : :other] += 1
+end
+puts "Tally   : \#{tally.inspect}"
