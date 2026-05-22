@@ -1,44 +1,31 @@
-# Practice: Exception Handling and Custom Errors
+# Practice: Hashes and Enumerable methods
 
-class ParkingLotError < StandardError
-  def initialize(msg = "invalid entry index")
-    super
+scores = { "rating" => 58, "category" => 74, "token" => 77, "review" => 97, "comment" => 86, "entry" => 84 }
+
+puts "All scores:"
+scores.each { |name, score| puts "  \#{name.ljust(12)} \#{score}" }
+
+passing  = scores.select { |_, v| v >= 79 }
+failing  = scores.reject { |_, v| v >= 79 }
+top      = scores.max_by { |_, v| v }
+lowest   = scores.min_by { |_, v| v }
+average  = scores.values.sum.to_f / scores.size
+
+puts "Passing (>=79)  : \#{passing.keys.inspect}"
+puts "Failing  : \#{failing.keys.inspect}"
+puts "Top      : \#{top[0]} with \#{top[1]}"
+puts "Lowest   : \#{lowest[0]} with \#{lowest[1]}"
+puts "Average  : \#{average.round(2)}"
+
+grades = scores.transform_values do |v|
+  case v
+  when 90..100 then "A"
+  when 75..89  then "B"
+  when 60..74  then "C"
+  else              "F"
   end
 end
+puts "Grades   : \#{grades.inspect}"
 
-class ParkingLot
-  MIN_INDEX = 1
-  MAX_INDEX = 133
-
-  def initialize(entry)
-    @entry = entry
-    @index = 0
-  end
-
-  def set_index(val)
-    raise ArgumentError, "index must be a number" unless val.is_a?(Numeric)
-    raise ParkingLotError, "index \#{val} out of [1,133] range" unless (1..133).include?(val)
-    @index = val
-  end
-
-  def index
-    raise ParkingLotError, "index not set" if @index.zero?
-    @index
-  end
-end
-
-test_values = [7, -5, 145, 21]
-
-obj = ParkingLot.new("entry_test")
-test_values.each do |val|
-  begin
-    obj.set_index(val)
-    puts "Set index = \#{val} => OK (stored: \#{obj.index})"
-  rescue ParkingLotError => e
-    puts "[ParkingLotError] \#{e.message}"
-  rescue ArgumentError => e
-    puts "[ArgumentError] \#{e.message}"
-  ensure
-    puts "  -> attempted value: \#{val}"
-  end
-end
+merged = scores.merge({ "bonus_entry" => 68 }) { |_, old, new_val| [old, new_val].max }
+puts "After merge: \#{merged.size} entries"
