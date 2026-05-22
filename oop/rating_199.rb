@@ -1,24 +1,62 @@
-# Practice: String Methods
+# Practice: Modules and Mixins
 
-sentence = "keep calm and write clean code"
+module Greetable
+  def greet
+    "Hello, I am \#{self.class.name}: \#{to_s}"
+  end
 
-puts sentence.upcase
-puts sentence.capitalize
-puts sentence.reverse
-puts sentence.length
-puts sentence.count("aeiou")
-puts sentence.gsub(/[aeiou]/, "*")
-puts sentence.split.length
-puts sentence.split.map(&:capitalize).join(" ")
-puts sentence.include?("ruby") ? "Ruby mentioned!" : "No Ruby here"
-puts sentence[0, 22] + "..."
-puts sentence.center(54, "-")
-puts sentence.squeeze(" ").strip
+  def farewell
+    "Goodbye from \#{self.class.name}"
+  end
+end
 
-words = sentence.split
-puts "Longest word  : \#{words.max_by(&:length)}"
-puts "Shortest word : \#{words.min_by(&:length)}"
-puts "Unique chars  : \#{sentence.chars.uniq.sort.inspect}"
+module Cacheable
+  def self.included(base)
+    base.instance_variable_set(:@tracked_count, 0)
+    base.extend(ClassMethods)
+  end
 
-freq = sentence.chars.tally.sort_by { |_, v| -v }.first(5)
-puts "Top 5 chars   : \#{freq.inspect}"
+  module ClassMethods
+    def track!
+      @tracked_count = (@tracked_count || 0) + 1
+    end
+
+    def tracked_count
+      @tracked_count || 0
+    end
+  end
+
+  def log_action(action)
+    self.class.track!
+    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
+  end
+end
+
+class TodoList
+  include Greetable
+  include Cacheable
+
+  attr_reader :account
+
+  def initialize(account)
+    @account = account
+  end
+
+  def to_s
+    "\#{@account}"
+  end
+
+  def perform
+    log_action(:perform)
+    "performed by \#{@account}"
+  end
+end
+
+3.times do |i|
+  obj = TodoList.new("account_\#{i + 1}")
+  puts obj.greet
+  puts obj.perform
+  puts obj.farewell
+  puts "---"
+end
+puts "TodoList tracked actions: \#{TodoList.tracked_count}"
