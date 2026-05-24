@@ -1,44 +1,31 @@
-# Practice: Exception Handling and Custom Errors
+# Practice: Hashes and Enumerable methods
 
-class BookStoreError < StandardError
-  def initialize(msg = "invalid message threshold")
-    super
+scores = { "user" => 87, "session" => 69, "event" => 56, "entry" => 59, "record" => 82, "category" => 93, "message" => 59 }
+
+puts "All scores:"
+scores.each { |name, score| puts "  \#{name.ljust(12)} \#{score}" }
+
+passing  = scores.select { |_, v| v >= 75 }
+failing  = scores.reject { |_, v| v >= 75 }
+top      = scores.max_by { |_, v| v }
+lowest   = scores.min_by { |_, v| v }
+average  = scores.values.sum.to_f / scores.size
+
+puts "Passing (>=75)  : \#{passing.keys.inspect}"
+puts "Failing  : \#{failing.keys.inspect}"
+puts "Top      : \#{top[0]} with \#{top[1]}"
+puts "Lowest   : \#{lowest[0]} with \#{lowest[1]}"
+puts "Average  : \#{average.round(2)}"
+
+grades = scores.transform_values do |v|
+  case v
+  when 90..100 then "A"
+  when 75..89  then "B"
+  when 60..74  then "C"
+  else              "F"
   end
 end
+puts "Grades   : \#{grades.inspect}"
 
-class BookStore
-  MIN_THRESHOLD = 7
-  MAX_THRESHOLD = 196
-
-  def initialize(message)
-    @message = message
-    @threshold = 0
-  end
-
-  def set_threshold(val)
-    raise ArgumentError, "threshold must be a number" unless val.is_a?(Numeric)
-    raise BookStoreError, "threshold \#{val} out of [7,196] range" unless (7..196).include?(val)
-    @threshold = val
-  end
-
-  def threshold
-    raise BookStoreError, "threshold not set" if @threshold.zero?
-    @threshold
-  end
-end
-
-test_values = [156, -1, 246, 26]
-
-obj = BookStore.new("message_test")
-test_values.each do |val|
-  begin
-    obj.set_threshold(val)
-    puts "Set threshold = \#{val} => OK (stored: \#{obj.threshold})"
-  rescue BookStoreError => e
-    puts "[BookStoreError] \#{e.message}"
-  rescue ArgumentError => e
-    puts "[ArgumentError] \#{e.message}"
-  ensure
-    puts "  -> attempted value: \#{val}"
-  end
-end
+merged = scores.merge({ "bonus_entry" => 68 }) { |_, old, new_val| [old, new_val].max }
+puts "After merge: \#{merged.size} entries"
