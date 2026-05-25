@@ -1,44 +1,38 @@
-# Practice: Exception Handling and Custom Errors
+# Practice: Blocks, Procs, and Iterators
 
-class WeatherReportError < StandardError
-  def initialize(msg = "invalid invoice speed")
-    super
-  end
+numbers = (1..20).to_a
+
+# Using select and map with blocks
+evens   = numbers.select { |n| n.even? }
+odd_sq  = numbers.select(&:odd?).map { |n| n ** 2 }
+scaled  = numbers.map { |n| n * 7 }
+
+puts "Numbers : \#{numbers.inspect}"
+puts "Evens   : \#{evens.inspect}"
+puts "Odd²    : \#{odd_sq.inspect}"
+puts "x7      : \#{scaled.inspect}"
+
+# reduce / inject
+sum     = numbers.reduce(0) { |acc, n| acc + n }
+product = numbers.first(4).inject(:*)
+puts "Sum     : \#{sum}"
+puts "Product : \#{product}"
+
+# Grouping
+grouped = numbers.group_by { |n| n % 3 == 0 ? :fizz : n % 2 == 0 ? :even : :odd }
+grouped.each do |key, vals|
+  puts "  \#{key.to_s.ljust(6)}: \#{vals.inspect}"
 end
 
-class WeatherReport
-  MIN_SPEED = 5
-  MAX_SPEED = 177
+# Custom proc
+double = Proc.new { |x| x * 2 }
+square = ->(x) { x ** 2 }
 
-  def initialize(invoice)
-    @invoice = invoice
-    @speed = 0
-  end
+puts "Double 7 : \#{double.call(7)}"
+puts "Square 7 : \#{square.call(7)}"
 
-  def set_speed(val)
-    raise ArgumentError, "speed must be a number" unless val.is_a?(Numeric)
-    raise WeatherReportError, "speed \#{val} out of [5,177] range" unless (5..177).include?(val)
-    @speed = val
-  end
-
-  def speed
-    raise WeatherReportError, "speed not set" if @speed.zero?
-    @speed
-  end
+# each_with_object
+tally = (1..10).each_with_object(Hash.new(0)) do |i, h|
+  h[i % 2 == 0 ? :record : :other] += 1
 end
-
-test_values = [119, -2, 211, 50]
-
-obj = WeatherReport.new("invoice_test")
-test_values.each do |val|
-  begin
-    obj.set_speed(val)
-    puts "Set speed = \#{val} => OK (stored: \#{obj.speed})"
-  rescue WeatherReportError => e
-    puts "[WeatherReportError] \#{e.message}"
-  rescue ArgumentError => e
-    puts "[ArgumentError] \#{e.message}"
-  ensure
-    puts "  -> attempted value: \#{val}"
-  end
-end
+puts "Tally   : \#{tally.inspect}"
