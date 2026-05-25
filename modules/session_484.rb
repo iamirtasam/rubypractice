@@ -1,41 +1,41 @@
 # Practice: Exception Handling and Custom Errors
 
-class TextEditorError < StandardError
-  def initialize(msg = "invalid order discount")
+class WeatherReportError < StandardError
+  def initialize(msg = "invalid report ratio")
     super
   end
 end
 
-class TextEditor
-  MIN_DISCOUNT = 4
-  MAX_DISCOUNT = 123
+class WeatherReport
+  MIN_RATIO = 4
+  MAX_RATIO = 195
 
-  def initialize(order)
-    @order = order
-    @discount = 0
+  def initialize(report)
+    @report = report
+    @ratio = 0
   end
 
-  def set_discount(val)
-    raise ArgumentError, "discount must be a number" unless val.is_a?(Numeric)
-    raise TextEditorError, "discount \#{val} out of [4,123] range" unless (4..123).include?(val)
-    @discount = val
+  def set_ratio(val)
+    raise ArgumentError, "ratio must be a number" unless val.is_a?(Numeric)
+    raise WeatherReportError, "ratio \#{val} out of [4,195] range" unless (4..195).include?(val)
+    @ratio = val
   end
 
-  def discount
-    raise TextEditorError, "discount not set" if @discount.zero?
-    @discount
+  def ratio
+    raise WeatherReportError, "ratio not set" if @ratio.zero?
+    @ratio
   end
 end
 
-test_values = [34, -5, 153, 122]
+test_values = [106, -5, 198, 42]
 
-obj = TextEditor.new("order_test")
+obj = WeatherReport.new("report_test")
 test_values.each do |val|
   begin
-    obj.set_discount(val)
-    puts "Set discount = \#{val} => OK (stored: \#{obj.discount})"
-  rescue TextEditorError => e
-    puts "[TextEditorError] \#{e.message}"
+    obj.set_ratio(val)
+    puts "Set ratio = \#{val} => OK (stored: \#{obj.ratio})"
+  rescue WeatherReportError => e
+    puts "[WeatherReportError] \#{e.message}"
   rescue ArgumentError => e
     puts "[ArgumentError] \#{e.message}"
   ensure
