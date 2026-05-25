@@ -1,44 +1,24 @@
-# Practice: Exception Handling and Custom Errors
+# Practice: String Methods
 
-class StudentError < StandardError
-  def initialize(msg = "invalid product output")
-    super
-  end
-end
+sentence = "practice makes perfect in every skill"
 
-class Student
-  MIN_OUTPUT = 8
-  MAX_OUTPUT = 86
+puts sentence.upcase
+puts sentence.capitalize
+puts sentence.reverse
+puts sentence.length
+puts sentence.count("aeiou")
+puts sentence.gsub(/[aeiou]/, "*")
+puts sentence.split.length
+puts sentence.split.map(&:capitalize).join(" ")
+puts sentence.include?("ruby") ? "Ruby mentioned!" : "No Ruby here"
+puts sentence[0, 24] + "..."
+puts sentence.center(66, "-")
+puts sentence.squeeze(" ").strip
 
-  def initialize(product)
-    @product = product
-    @output = 0
-  end
+words = sentence.split
+puts "Longest word  : \#{words.max_by(&:length)}"
+puts "Shortest word : \#{words.min_by(&:length)}"
+puts "Unique chars  : \#{sentence.chars.uniq.sort.inspect}"
 
-  def set_output(val)
-    raise ArgumentError, "output must be a number" unless val.is_a?(Numeric)
-    raise StudentError, "output \#{val} out of [8,86] range" unless (8..86).include?(val)
-    @output = val
-  end
-
-  def output
-    raise StudentError, "output not set" if @output.zero?
-    @output
-  end
-end
-
-test_values = [17, -3, 114, 58]
-
-obj = Student.new("product_test")
-test_values.each do |val|
-  begin
-    obj.set_output(val)
-    puts "Set output = \#{val} => OK (stored: \#{obj.output})"
-  rescue StudentError => e
-    puts "[StudentError] \#{e.message}"
-  rescue ArgumentError => e
-    puts "[ArgumentError] \#{e.message}"
-  ensure
-    puts "  -> attempted value: \#{val}"
-  end
-end
+freq = sentence.chars.tally.sort_by { |_, v| -v }.first(5)
+puts "Top 5 chars   : \#{freq.inspect}"
