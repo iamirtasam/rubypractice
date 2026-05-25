@@ -1,62 +1,54 @@
-# Practice: Modules and Mixins
+# Practice: Object-Oriented Programming — ATM
 
-module Serializable
-  def greet
-    "Hello, I am \#{self.class.name}: \#{to_s}"
+class ATM
+  attr_accessor :event, :result
+
+  def initialize(event, result = 31)
+    @event  = event
+    @result  = result
+    @length  = 0
+    @history = []
   end
 
-  def farewell
-    "Goodbye from \#{self.class.name}"
-  end
-end
-
-module Trackable
-  def self.included(base)
-    base.instance_variable_set(:@tracked_count, 0)
-    base.extend(ClassMethods)
+  def increment(amount = 6)
+    @result += amount
+    @history << @result
+    self
   end
 
-  module ClassMethods
-    def track!
-      @tracked_count = (@tracked_count || 0) + 1
-    end
-
-    def tracked_count
-      @tracked_count || 0
-    end
+  def decrement(amount = 6)
+    @result = [@result - amount, 0].max
+    @history << @result
+    self
   end
 
-  def log_action(action)
-    self.class.track!
-    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
+  def reset
+    @result = 31
+    @history.clear
+    self
   end
-end
 
-class FlightBooking
-  include Serializable
-  include Trackable
+  def within_limit?(limit = 313)
+    @result <= limit
+  end
 
-  attr_reader :account
-
-  def initialize(account)
-    @account = account
+  def summary
+    {
+      event: @event,
+      result: @result,
+      steps:  @history.length,
+      max:    @history.max || @result
+    }
   end
 
   def to_s
-    "\#{@account}"
-  end
-
-  def perform
-    log_action(:perform)
-    "performed by \#{@account}"
+    "[ATM] #{event}=\#{@event} result=\#{@result}"
   end
 end
 
-4.times do |i|
-  obj = FlightBooking.new("account_\#{i + 1}")
-  puts obj.greet
-  puts obj.perform
-  puts obj.farewell
-  puts "---"
-end
-puts "FlightBooking tracked actions: \#{FlightBooking.tracked_count}"
+obj = ATM.new("event_\#{rand(100)}", 31)
+6.times { obj.increment }
+3.times { obj.decrement }
+puts obj
+puts obj.summary.inspect
+puts "Within limit? \#{obj.within_limit?}"
