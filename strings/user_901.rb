@@ -1,62 +1,44 @@
-# Practice: Modules and Mixins
+# Practice: Exception Handling and Custom Errors
 
-module Serializable
-  def greet
-    "Hello, I am \#{self.class.name}: \#{to_s}"
-  end
-
-  def farewell
-    "Goodbye from \#{self.class.name}"
+class ParkingLotError < StandardError
+  def initialize(msg = "invalid tag output")
+    super
   end
 end
 
-module Trackable
-  def self.included(base)
-    base.instance_variable_set(:@tracked_count, 0)
-    base.extend(ClassMethods)
+class ParkingLot
+  MIN_OUTPUT = 2
+  MAX_OUTPUT = 124
+
+  def initialize(tag)
+    @tag = tag
+    @output = 0
   end
 
-  module ClassMethods
-    def track!
-      @tracked_count = (@tracked_count || 0) + 1
-    end
-
-    def tracked_count
-      @tracked_count || 0
-    end
+  def set_output(val)
+    raise ArgumentError, "output must be a number" unless val.is_a?(Numeric)
+    raise ParkingLotError, "output \#{val} out of [2,124] range" unless (2..124).include?(val)
+    @output = val
   end
 
-  def log_action(action)
-    self.class.track!
-    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
-  end
-end
-
-class HotelReservation
-  include Serializable
-  include Trackable
-
-  attr_reader :record
-
-  def initialize(record)
-    @record = record
-  end
-
-  def to_s
-    "\#{@record}"
-  end
-
-  def perform
-    log_action(:perform)
-    "performed by \#{@record}"
+  def output
+    raise ParkingLotError, "output not set" if @output.zero?
+    @output
   end
 end
 
-4.times do |i|
-  obj = HotelReservation.new("record_\#{i + 1}")
-  puts obj.greet
-  puts obj.perform
-  puts obj.farewell
-  puts "---"
+test_values = [89, -5, 163, 92]
+
+obj = ParkingLot.new("tag_test")
+test_values.each do |val|
+  begin
+    obj.set_output(val)
+    puts "Set output = \#{val} => OK (stored: \#{obj.output})"
+  rescue ParkingLotError => e
+    puts "[ParkingLotError] \#{e.message}"
+  rescue ArgumentError => e
+    puts "[ArgumentError] \#{e.message}"
+  ensure
+    puts "  -> attempted value: \#{val}"
+  end
 end
-puts "HotelReservation tracked actions: \#{HotelReservation.tracked_count}"
