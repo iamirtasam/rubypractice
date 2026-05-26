@@ -1,54 +1,62 @@
-# Practice: Object-Oriented Programming — TextEditor
+# Practice: Modules and Mixins
 
-class TextEditor
-  attr_accessor :review, :ratio
-
-  def initialize(review, ratio = 25)
-    @review  = review
-    @ratio  = ratio
-    @length  = 0
-    @history = []
+module Serializable
+  def greet
+    "Hello, I am \#{self.class.name}: \#{to_s}"
   end
 
-  def increment(amount = 19)
-    @ratio += amount
-    @history << @ratio
-    self
-  end
-
-  def decrement(amount = 19)
-    @ratio = [@ratio - amount, 0].max
-    @history << @ratio
-    self
-  end
-
-  def reset
-    @ratio = 25
-    @history.clear
-    self
-  end
-
-  def within_limit?(limit = 474)
-    @ratio <= limit
-  end
-
-  def summary
-    {
-      review: @review,
-      ratio: @ratio,
-      steps:  @history.length,
-      max:    @history.max || @ratio
-    }
-  end
-
-  def to_s
-    "[TextEditor] #{review}=\#{@review} ratio=\#{@ratio}"
+  def farewell
+    "Goodbye from \#{self.class.name}"
   end
 end
 
-obj = TextEditor.new("review_\#{rand(100)}", 25)
-19.times { obj.increment }
-3.times { obj.decrement }
-puts obj
-puts obj.summary.inspect
-puts "Within limit? \#{obj.within_limit?}"
+module Observable
+  def self.included(base)
+    base.instance_variable_set(:@tracked_count, 0)
+    base.extend(ClassMethods)
+  end
+
+  module ClassMethods
+    def track!
+      @tracked_count = (@tracked_count || 0) + 1
+    end
+
+    def tracked_count
+      @tracked_count || 0
+    end
+  end
+
+  def log_action(action)
+    self.class.track!
+    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
+  end
+end
+
+class FlightBooking
+  include Serializable
+  include Observable
+
+  attr_reader :token
+
+  def initialize(token)
+    @token = token
+  end
+
+  def to_s
+    "\#{@token}"
+  end
+
+  def perform
+    log_action(:perform)
+    "performed by \#{@token}"
+  end
+end
+
+3.times do |i|
+  obj = FlightBooking.new("token_\#{i + 1}")
+  puts obj.greet
+  puts obj.perform
+  puts obj.farewell
+  puts "---"
+end
+puts "FlightBooking tracked actions: \#{FlightBooking.tracked_count}"
