@@ -1,31 +1,24 @@
-# Practice: Hashes and Enumerable methods
+# Practice: String Methods
 
-scores = { "record" => 51, "account" => 60, "order" => 89, "token" => 96, "user" => 92, "task" => 53 }
+sentence = "the quick brown fox jumps over the lazy dog"
 
-puts "All scores:"
-scores.each { |name, score| puts "  \#{name.ljust(12)} \#{score}" }
+puts sentence.upcase
+puts sentence.capitalize
+puts sentence.reverse
+puts sentence.length
+puts sentence.count("aeiou")
+puts sentence.gsub(/[aeiou]/, "*")
+puts sentence.split.length
+puts sentence.split.map(&:capitalize).join(" ")
+puts sentence.include?("ruby") ? "Ruby mentioned!" : "No Ruby here"
+puts sentence[0, 22] + "..."
+puts sentence.center(75, "-")
+puts sentence.squeeze(" ").strip
 
-passing  = scores.select { |_, v| v >= 74 }
-failing  = scores.reject { |_, v| v >= 74 }
-top      = scores.max_by { |_, v| v }
-lowest   = scores.min_by { |_, v| v }
-average  = scores.values.sum.to_f / scores.size
+words = sentence.split
+puts "Longest word  : \#{words.max_by(&:length)}"
+puts "Shortest word : \#{words.min_by(&:length)}"
+puts "Unique chars  : \#{sentence.chars.uniq.sort.inspect}"
 
-puts "Passing (>=74)  : \#{passing.keys.inspect}"
-puts "Failing  : \#{failing.keys.inspect}"
-puts "Top      : \#{top[0]} with \#{top[1]}"
-puts "Lowest   : \#{lowest[0]} with \#{lowest[1]}"
-puts "Average  : \#{average.round(2)}"
-
-grades = scores.transform_values do |v|
-  case v
-  when 90..100 then "A"
-  when 75..89  then "B"
-  when 60..74  then "C"
-  else              "F"
-  end
-end
-puts "Grades   : \#{grades.inspect}"
-
-merged = scores.merge({ "bonus_entry" => 74 }) { |_, old, new_val| [old, new_val].max }
-puts "After merge: \#{merged.size} entries"
+freq = sentence.chars.tally.sort_by { |_, v| -v }.first(5)
+puts "Top 5 chars   : \#{freq.inspect}"
