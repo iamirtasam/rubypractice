@@ -1,52 +1,38 @@
-# Practice: Sorting and Searching Algorithms
+# Practice: Blocks, Procs, and Iterators
 
-def bubble_sort(arr)
-  n = arr.length
-  loop do
-    swapped = false
-    (n - 1).times do |i|
-      if arr[i] > arr[i + 1]
-        arr[i], arr[i + 1] = arr[i + 1], arr[i]
-        swapped = true
-      end
-    end
-    break unless swapped
-  end
-  arr
+numbers = (1..18).to_a
+
+# Using select and map with blocks
+evens   = numbers.select { |n| n.even? }
+odd_sq  = numbers.select(&:odd?).map { |n| n ** 2 }
+scaled  = numbers.map { |n| n * 3 }
+
+puts "Numbers : \#{numbers.inspect}"
+puts "Evens   : \#{evens.inspect}"
+puts "Odd²    : \#{odd_sq.inspect}"
+puts "x3      : \#{scaled.inspect}"
+
+# reduce / inject
+sum     = numbers.reduce(0) { |acc, n| acc + n }
+product = numbers.first(3).inject(:*)
+puts "Sum     : \#{sum}"
+puts "Product : \#{product}"
+
+# Grouping
+grouped = numbers.group_by { |n| n % 3 == 0 ? :fizz : n % 2 == 0 ? :even : :odd }
+grouped.each do |key, vals|
+  puts "  \#{key.to_s.ljust(6)}: \#{vals.inspect}"
 end
 
-def insertion_sort(arr)
-  arr.each_with_index do |val, i|
-    j = i
-    while j > 0 && arr[j - 1] > arr[j]
-      arr[j], arr[j - 1] = arr[j - 1], arr[j]
-      j -= 1
-    end
-  end
-  arr
+# Custom proc
+double = Proc.new { |x| x * 2 }
+square = ->(x) { x ** 2 }
+
+puts "Double 7 : \#{double.call(7)}"
+puts "Square 7 : \#{square.call(7)}"
+
+# each_with_object
+tally = (1..9).each_with_object(Hash.new(0)) do |i, h|
+  h[i % 2 == 0 ? :account : :other] += 1
 end
-
-def binary_search(arr, target)
-  lo, hi = 0, arr.length - 1
-  while lo <= hi
-    mid = (lo + hi) / 2
-    return mid if arr[mid] == target
-    arr[mid] < target ? lo = mid + 1 : hi = mid - 1
-  end
-  nil
-end
-
-sample = Array.new(9) { rand(100) }
-puts "Original : \#{sample.inspect}"
-
-bubbled   = bubble_sort(sample.dup)
-inserted  = insertion_sort(sample.dup)
-puts "Bubble   : \#{bubbled.inspect}"
-puts "Insertion: \#{inserted.inspect}"
-
-idx = binary_search(bubbled, 47)
-puts "Search 47 : \#{idx ? "found at \#{idx}" : "not found"}"
-
-fib = ->(n) { n <= 1 ? n : fib.call(n - 1) + fib.call(n - 2) }
-puts "Fib(10)  : \#{fib.call(10)}"
-puts "Primes<30: \#{(2..30).select { |n| (2...n).none? { |d| n % d == 0 } }.inspect}"
+puts "Tally   : \#{tally.inspect}"
