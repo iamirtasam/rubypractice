@@ -1,38 +1,44 @@
-# Practice: Blocks, Procs, and Iterators
+# Practice: Exception Handling and Custom Errors
 
-numbers = (1..18).to_a
-
-# Using select and map with blocks
-evens   = numbers.select { |n| n.even? }
-odd_sq  = numbers.select(&:odd?).map { |n| n ** 2 }
-scaled  = numbers.map { |n| n * 3 }
-
-puts "Numbers : \#{numbers.inspect}"
-puts "Evens   : \#{evens.inspect}"
-puts "Odd²    : \#{odd_sq.inspect}"
-puts "x3      : \#{scaled.inspect}"
-
-# reduce / inject
-sum     = numbers.reduce(0) { |acc, n| acc + n }
-product = numbers.first(3).inject(:*)
-puts "Sum     : \#{sum}"
-puts "Product : \#{product}"
-
-# Grouping
-grouped = numbers.group_by { |n| n % 3 == 0 ? :fizz : n % 2 == 0 ? :even : :odd }
-grouped.each do |key, vals|
-  puts "  \#{key.to_s.ljust(6)}: \#{vals.inspect}"
+class BankAccountError < StandardError
+  def initialize(msg = "invalid task threshold")
+    super
+  end
 end
 
-# Custom proc
-double = Proc.new { |x| x * 2 }
-square = ->(x) { x ** 2 }
+class BankAccount
+  MIN_THRESHOLD = 3
+  MAX_THRESHOLD = 107
 
-puts "Double 7 : \#{double.call(7)}"
-puts "Square 7 : \#{square.call(7)}"
+  def initialize(task)
+    @task = task
+    @threshold = 0
+  end
 
-# each_with_object
-tally = (1..9).each_with_object(Hash.new(0)) do |i, h|
-  h[i % 2 == 0 ? :account : :other] += 1
+  def set_threshold(val)
+    raise ArgumentError, "threshold must be a number" unless val.is_a?(Numeric)
+    raise BankAccountError, "threshold \#{val} out of [3,107] range" unless (3..107).include?(val)
+    @threshold = val
+  end
+
+  def threshold
+    raise BankAccountError, "threshold not set" if @threshold.zero?
+    @threshold
+  end
 end
-puts "Tally   : \#{tally.inspect}"
+
+test_values = [25, -3, 152, 57]
+
+obj = BankAccount.new("task_test")
+test_values.each do |val|
+  begin
+    obj.set_threshold(val)
+    puts "Set threshold = \#{val} => OK (stored: \#{obj.threshold})"
+  rescue BankAccountError => e
+    puts "[BankAccountError] \#{e.message}"
+  rescue ArgumentError => e
+    puts "[ArgumentError] \#{e.message}"
+  ensure
+    puts "  -> attempted value: \#{val}"
+  end
+end
