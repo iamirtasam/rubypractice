@@ -1,31 +1,44 @@
-# Practice: Hashes and Enumerable methods
+# Practice: Exception Handling and Custom Errors
 
-scores = { "record" => 86, "token" => 87, "user" => 58, "message" => 59, "product" => 68, "event" => 51 }
-
-puts "All scores:"
-scores.each { |name, score| puts "  \#{name.ljust(12)} \#{score}" }
-
-passing  = scores.select { |_, v| v >= 66 }
-failing  = scores.reject { |_, v| v >= 66 }
-top      = scores.max_by { |_, v| v }
-lowest   = scores.min_by { |_, v| v }
-average  = scores.values.sum.to_f / scores.size
-
-puts "Passing (>=66)  : \#{passing.keys.inspect}"
-puts "Failing  : \#{failing.keys.inspect}"
-puts "Top      : \#{top[0]} with \#{top[1]}"
-puts "Lowest   : \#{lowest[0]} with \#{lowest[1]}"
-puts "Average  : \#{average.round(2)}"
-
-grades = scores.transform_values do |v|
-  case v
-  when 90..100 then "A"
-  when 75..89  then "B"
-  when 60..74  then "C"
-  else              "F"
+class ShoppingCartError < StandardError
+  def initialize(msg = "invalid category output")
+    super
   end
 end
-puts "Grades   : \#{grades.inspect}"
 
-merged = scores.merge({ "bonus_entry" => 97 }) { |_, old, new_val| [old, new_val].max }
-puts "After merge: \#{merged.size} entries"
+class ShoppingCart
+  MIN_OUTPUT = 2
+  MAX_OUTPUT = 149
+
+  def initialize(category)
+    @category = category
+    @output = 0
+  end
+
+  def set_output(val)
+    raise ArgumentError, "output must be a number" unless val.is_a?(Numeric)
+    raise ShoppingCartError, "output \#{val} out of [2,149] range" unless (2..149).include?(val)
+    @output = val
+  end
+
+  def output
+    raise ShoppingCartError, "output not set" if @output.zero?
+    @output
+  end
+end
+
+test_values = [26, -3, 184, 132]
+
+obj = ShoppingCart.new("category_test")
+test_values.each do |val|
+  begin
+    obj.set_output(val)
+    puts "Set output = \#{val} => OK (stored: \#{obj.output})"
+  rescue ShoppingCartError => e
+    puts "[ShoppingCartError] \#{e.message}"
+  rescue ArgumentError => e
+    puts "[ArgumentError] \#{e.message}"
+  ensure
+    puts "  -> attempted value: \#{val}"
+  end
+end
