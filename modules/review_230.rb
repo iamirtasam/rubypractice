@@ -1,62 +1,24 @@
-# Practice: Modules and Mixins
+# Practice: String Methods
 
-module Loggable
-  def greet
-    "Hello, I am \#{self.class.name}: \#{to_s}"
-  end
+sentence = "learning to code opens many new doors"
 
-  def farewell
-    "Goodbye from \#{self.class.name}"
-  end
-end
+puts sentence.upcase
+puts sentence.capitalize
+puts sentence.reverse
+puts sentence.length
+puts sentence.count("aeiou")
+puts sentence.gsub(/[aeiou]/, "*")
+puts sentence.split.length
+puts sentence.split.map(&:capitalize).join(" ")
+puts sentence.include?("ruby") ? "Ruby mentioned!" : "No Ruby here"
+puts sentence[0, 20] + "..."
+puts sentence.center(60, "-")
+puts sentence.squeeze(" ").strip
 
-module Observable
-  def self.included(base)
-    base.instance_variable_set(:@tracked_count, 0)
-    base.extend(ClassMethods)
-  end
+words = sentence.split
+puts "Longest word  : \#{words.max_by(&:length)}"
+puts "Shortest word : \#{words.min_by(&:length)}"
+puts "Unique chars  : \#{sentence.chars.uniq.sort.inspect}"
 
-  module ClassMethods
-    def track!
-      @tracked_count = (@tracked_count || 0) + 1
-    end
-
-    def tracked_count
-      @tracked_count || 0
-    end
-  end
-
-  def log_action(action)
-    self.class.track!
-    puts "[LOG] \#{self.class.name}#\#{action} called (total: \#{self.class.tracked_count})"
-  end
-end
-
-class Employee
-  include Loggable
-  include Observable
-
-  attr_reader :token
-
-  def initialize(token)
-    @token = token
-  end
-
-  def to_s
-    "\#{@token}"
-  end
-
-  def perform
-    log_action(:perform)
-    "performed by \#{@token}"
-  end
-end
-
-3.times do |i|
-  obj = Employee.new("token_\#{i + 1}")
-  puts obj.greet
-  puts obj.perform
-  puts obj.farewell
-  puts "---"
-end
-puts "Employee tracked actions: \#{Employee.tracked_count}"
+freq = sentence.chars.tally.sort_by { |_, v| -v }.first(5)
+puts "Top 5 chars   : \#{freq.inspect}"
