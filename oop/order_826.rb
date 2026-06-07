@@ -1,24 +1,54 @@
-# Practice: String Methods
+# Practice: Object-Oriented Programming — Inventory
 
-sentence = "ruby is an elegant and expressive language"
+class Inventory
+  attr_accessor :account, :count
 
-puts sentence.upcase
-puts sentence.capitalize
-puts sentence.reverse
-puts sentence.length
-puts sentence.count("aeiou")
-puts sentence.gsub(/[aeiou]/, "*")
-puts sentence.split.length
-puts sentence.split.map(&:capitalize).join(" ")
-puts sentence.include?("ruby") ? "Ruby mentioned!" : "No Ruby here"
-puts sentence[0, 12] + "..."
-puts sentence.center(66, "-")
-puts sentence.squeeze(" ").strip
+  def initialize(account, count = 53)
+    @account  = account
+    @count  = count
+    @result  = 0
+    @history = []
+  end
 
-words = sentence.split
-puts "Longest word  : \#{words.max_by(&:length)}"
-puts "Shortest word : \#{words.min_by(&:length)}"
-puts "Unique chars  : \#{sentence.chars.uniq.sort.inspect}"
+  def increment(amount = 6)
+    @count += amount
+    @history << @count
+    self
+  end
 
-freq = sentence.chars.tally.sort_by { |_, v| -v }.first(5)
-puts "Top 5 chars   : \#{freq.inspect}"
+  def decrement(amount = 6)
+    @count = [@count - amount, 0].max
+    @history << @count
+    self
+  end
+
+  def reset
+    @count = 53
+    @history.clear
+    self
+  end
+
+  def within_limit?(limit = 232)
+    @count <= limit
+  end
+
+  def summary
+    {
+      account: @account,
+      count: @count,
+      steps:  @history.length,
+      max:    @history.max || @count
+    }
+  end
+
+  def to_s
+    "[Inventory] #{account}=\#{@account} count=\#{@count}"
+  end
+end
+
+obj = Inventory.new("account_\#{rand(100)}", 53)
+6.times { obj.increment }
+1.times { obj.decrement }
+puts obj
+puts obj.summary.inspect
+puts "Within limit? \#{obj.within_limit?}"
